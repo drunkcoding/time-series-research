@@ -18,7 +18,7 @@ class DCCA(object):
         self.y_data = diff(log(reader.Y.values)).tolist()   
         self.length = len(self.x_data)
         self.hurst_list = []
-        self.fig = filename + '_loglog.jpg'
+        self.fig = filename + '_log.jpg'
 
     def _fit_residual(self, degree, x_wins, y_wins, r_x, step_t):
         num_wins = len(x_wins)
@@ -62,7 +62,7 @@ class DCCA(object):
             tmp = [i for i in range(1, num_wins*step_t+1)]
             r_x = self.partition(tmp, step_t, num_wins)
             corr_list.append(self._fit_residual(7, x_wins, y_wins, r_x, step_t))
-        plt.figure()
+        #plt.figure()
         expected = lambda n: 1/sqrt(n*np.pi/2)*sum([sqrt((n-i)/i) for i in range(1,n)]) if n >=340 else 1/sqrt(np.pi)/gamma(n/2)*gamma((n-1)/2)*sum([sqrt((n-i)/i) for i in range(1,n)])
         for i in range(len(self.flist)):
             F_q = [element[i] for element in corr_list]
@@ -71,9 +71,9 @@ class DCCA(object):
             F_log = log(F_q)
             y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
             coef = polyfit(x_log, y_log, 1)
-            plot2 = plt.plot(x_log, y_log, label='trend')
+            #plot2 = plt.plot(x_log, y_log, label='trend')
             self.hurst_list.append(coef[0])
-        plt.savefig(self.fig)
+        #plt.savefig(self.fig)
         #print(self.hurst_list)
         #self.plot(self.hurst_list)
         

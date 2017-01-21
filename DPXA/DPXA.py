@@ -23,47 +23,6 @@ class DPXA(object):
         self.hurst_list = []
         self.fig = 'graph\\' + filename + '_log.jpg'
 
-    def plot(self, hurst_list):
-        f_length = len(self.flist)
-        size_t = 10
-        #----------------------q vs. H_q
-        plt.figure()
-        plt.scatter(self.flist, self.hurst_list[0], s = size_t, c = 'b', edgecolors = 'none', label='A data')
-        plt.scatter(self.flist, self.hurst_list[1], s = size_t, c = 'r', edgecolors = 'none', label='B data')
-        plt.scatter(self.flist, self.hurst_list[2], s = size_t, c = 'y', edgecolors = 'none', label='C data')
-        plt.xlabel('q')
-        plt.ylabel('H_q')
-        plt.legend(loc = 'best')
-        plt.savefig('graph\\Hq_q2.jpg')
-
-        #----------------------q vs. tau
-        plt.figure()
-        tau = [[self.flist[i]*self.hurst_list[k][i]-1 for i in range(f_length)] for k in [0,1,2]]
-        #tau = [self.flist[i]*hurst_list[i]-(self.flist[i]*hurst_list[i]-1)/(self.flist[i]-1) for i in range(f_length)]
-        plt.scatter(self.flist, tau[0], s = size_t, c = 'b', edgecolors = 'none', label='A data')
-        plt.scatter(self.flist, tau[1], s = size_t, c = 'r', edgecolors = 'none', label='B data')
-        plt.scatter(self.flist, tau[2], s = size_t, c = 'y', edgecolors = 'none', label='C data')
-        plt.xlabel('q')
-        plt.ylabel('tau')
-        plt.legend(loc = 'lower right')
-        plt.savefig('graph\\tau_q2.jpg')
-        #----------------------alfa vs. f_alfa
-        tmp = diff(tau)
-        tmp2 = diff(flist)
-        #print(np.divide(tmp, tmp2))
-        alfa = np.divide(tmp, tmp2)
-        for k in alfa: print(max(k)-min(k))
-        f_alfa = [[flist[i]*alfa[k][i]-tau[k][i] for i in range(f_length-1)] for k in [0,1,2]]
-        plt.figure()
-        plt.scatter(alfa[0], f_alfa[0], s = size_t, c = 'b', edgecolors = 'none', label='A data')
-        plt.scatter(alfa[1], f_alfa[1], s = size_t, c = 'r', edgecolors = 'none', label='B data')
-        plt.scatter(alfa[2], f_alfa[2], s = size_t, c = 'y', edgecolors = 'none', label='C data')
-        plt.xlabel('alfa')
-        plt.ylabel('f_alfa')
-        plt.legend(loc = 'best')
-        plt.savefig('graph\\f_alfa2.jpg')
-
-
     def _fit_residual(self, degree, x_wins, y_wins, z_wins, r_x, step_t):
         num_wins = len(x_wins)
         nroot = lambda x, q: exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
