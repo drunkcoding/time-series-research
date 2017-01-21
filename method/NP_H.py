@@ -47,9 +47,9 @@ class DCCA(object):
         return a+b
         
     def generate(self):
-        base = 2
-        #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
-        step_list = [k for k in range(20, int(self.length/2))]
+        base = 1.2
+        #step_list = [int(self.length/base**x) for x in range(int(log(4)/log(base)), int(log(self.length)/log(base))+1) if base**x <= self.length/15]
+        step_list = [k for k in range(10, int(self.length/4), 10)]
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:
