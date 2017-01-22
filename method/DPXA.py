@@ -85,16 +85,16 @@ class MF_DPXA(object):
             x_log = log(step_list)
             F_log = log(F_q)
             y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
-            coef = polyfit(x_log, y_log, 1)
+            coef = polyfit(x_log, F_log, 1)
             #plot2 = plt.plot(x_log, y_log, label='trend')
             self.hurst_list.append(coef[0])
         #plt.savefig(self.fig)
         #print(self.hurst_list)
         #self.plot(self.hurst_list)
         f_length = len(self.flist)
-        self.tau = [self.flist[i]*hurst_list[i]-1 for i in range(f_length)]
+        self.tau = [self.flist[i]*self.hurst_list[i]-1 for i in range(f_length)]
         tmp = diff(self.tau)
         tmp2 = diff(self.flist)
         self.alfa = np.divide(tmp, tmp2)
-        self.f_alfa = [flist[i]*alfa[i]-tau[i] for i in range(f_length-1)]
+        self.f_alfa = [self.flist[i]*self.alfa[i]-self.tau[i] for i in range(f_length-1)]
 
