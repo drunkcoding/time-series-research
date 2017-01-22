@@ -10,9 +10,9 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 class MF_DPXA(object):
-    def __init__(self, min_q, max_q, bandwith, filename):
+    def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        reader = pd.read_csv(filename)
+        #reader = pd.read_csv(filename)
         #print(reader)
         self.x_data = diff(log(reader.X.values)).tolist()
         self.y_data = diff(log(reader.Y.values)).tolist()
@@ -24,7 +24,7 @@ class MF_DPXA(object):
         self.tau = None
         self.alfa = None
         self.f_alfa = None
-        self.fig = 'graph\\' + filename + '_log.jpg'
+        #self.fig = 'graph\\' + filename + '_log.jpg'
 
     def _fit_residual(self, degree, x_wins, y_wins, z_wins, r_x, step_t):
         num_wins = len(x_wins)
