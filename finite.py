@@ -1,17 +1,38 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import os
 
 from method.DPXA import MF_DPXA
 from method.DCCA import MF_DCCA
 from method.surrogate import FSE_init
 
-reader, reader_rand, reader_surr = FSE_init('data\\period1_1.csv')
-method_dcca = MF_DCCA(-5, 5, 1, reader)
-method_dcca_rand = MF_DCCA(-5, 5, 1, reader_rand)
-method_dcca_surr = MF_DCCA(-5, 5, 1, reader_surr)
-method_dcca.generate()
-method_dcca_rand.generate()
-method_dcca_surr.generate()
-hurst_list = [method_dcca.hurst_list, method_dcca_rand.hurst_list, method_dcca_surr.hurst_list]
-for line in hurst_list: print(line)
-#print(reader, reader_rand, reader_surr)
+def estimate_fse(filename, class_t, folder):
+    reader, reader_rand, reader_surr = FSE_init('data\\' + filename)
+    method_dcca = class_t(-5, 5, 10, reader)
+    method_dcca_rand = class_t(-5, 5, 10, reader_rand)
+    method_dcca_surr = class_t(-5, 5, 10, reader_surr)
+    method_dcca.generate()
+    method_dcca_rand.generate()
+    method_dcca_surr.generate()
+    alfa = [method_dcca.alfa, method_dcca_rand.alfa, method_dcca_surr.alfa]
+    f_alfa = [method_dcca.f_alfa, method_dcca_rand.f_alfa, method_dcca_surr.f_alfa]
+    size_t = 10
+    plt.figure()
+    plt.scatter(alfa[0], f_alfa[0], s = size_t, c = 'b', edgecolors = 'none', label='A origin')
+    plt.scatter(alfa[1], f_alfa[1], s = size_t, c = 'r', edgecolors = 'none', label='A random')
+    plt.scatter(alfa[2], f_alfa[2], s = size_t, c = 'y', edgecolors = 'none', label='A surrogate')
+    plt.xlabel('alfa')
+    plt.ylabel('f_alfa')
+    plt.legend(loc = 'lower left')
+    plt.savefig('graph\\'+ folder + filename +'.jpg')
+    print(filename)
+    print('origin', max(method_dcca.alfa)-min(method_dcca.alfa))
+    print('random', max(method_dcca_rand.alfa)-min(method_dcca_rand.alfa))
+    print('surrogate', max(method_dcca_surr.alfa)-min(method_dcca_surr.alfa))
+
+current_dir = 'C:\\Users\\xueni\\Documents\\GitHub\\time-series-research\\data'
+for root, dirs, files in os.walk(current_dir):
+    for file in files:
+        estimate_fse(file, MF_DCCA, 'fse_dcca\\')
+        estimate_fse(file, MF_DPXA, 'fse_dpxa\\')
