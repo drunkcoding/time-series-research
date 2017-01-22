@@ -51,6 +51,43 @@ def AAFT_surrogates(original_data):
 
     return rescaled_data
 
+def refined_AAFT_surrogates(self, original_data, n_iterations):
+    #  Get size of dimensions
+    n_time = original_data.shape[1]
+
+    #  Get Fourier transform of original data with caching
+    fourier_transform = np.fft.rfft(original_data, axis=1)
+
+    #  Get Fourier amplitudes
+    original_fourier_amps = np.abs(fourier_transform)
+
+    #  Get sorted copy of original data
+    sorted_original = original_data.copy()
+    sorted_original.sort(axis=1)
+
+    #  Get starting point / initial conditions for R surrogates
+    # (see [Schreiber2000]_)
+    R = self.AAFT_surrogates(original_data)
+
+    #  Start iteration
+    for i in range(n_iterations):
+        #  Get Fourier phases of R surrogate
+        r_fft = np.fft.rfft(R, axis=1)
+        r_phases = r_fft / np.abs(r_fft)
+
+        #  Transform back, replacing the actual amplitudes by the desired
+        #  ones, but keeping the phases exp(iψ(i)
+        s = np.fft.irfft(original_fourier_amps * r_phases, n=n_time,
+                             axis=1)
+
+        #  Rescale to desired amplitude distribution
+        ranks = s.argsort(axis=1).argsort(axis=1)
+
+        for j in range(original_data.shape[0]):
+            R[j, :] = sorted_original[j, ranks[j, :]]
+
+    return R
+
 def FSE_init(filename):
     reader = pd.read_csv(filename)
     df_origin = reader
