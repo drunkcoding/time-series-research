@@ -51,7 +51,7 @@ def AAFT_surrogates(original_data):
 
     return rescaled_data
 
-def refined_AAFT_surrogates(self, original_data, n_iterations):
+def refined_AAFT_surrogates(original_data, n_iterations):
     #  Get size of dimensions
     n_time = original_data.shape[1]
 
@@ -67,7 +67,7 @@ def refined_AAFT_surrogates(self, original_data, n_iterations):
 
     #  Get starting point / initial conditions for R surrogates
     # (see [Schreiber2000]_)
-    R = self.AAFT_surrogates(original_data)
+    R = AAFT_surrogates(original_data)
 
     #  Start iteration
     for i in range(n_iterations):
@@ -94,7 +94,8 @@ def FSE_init(filename):
     df_random = reader.iloc[np.random.permutation(len(reader))]
     key_list = [key for key in reader]
     list_t = [reader[key].values for key in reader]
-    tmp_surr = AAFT_surrogates(np.array(list_t))
+    #tmp_surr = AAFT_surrogates(np.array(list_t))
+    tmp_surr = refined_AAFT_surrogates(np.array(list_t), 20)
     surrogated = {}
     for i in range(len(key_list)): surrogated[key_list[i]] = tmp_surr[i]
     df_surr = pd.DataFrame(surrogated)
