@@ -8,3 +8,5 @@ C-data: (BDTI TD3: 265,000mt, Middle East Gulf to Japan -- BDTI TD5: 130,000mt, 
 with two seperated period before and after financial crisis:  
 Period 1: 1998/1/27 -- 2008/2/20  
 Period 2: 2009/7/31 -- 2014/12/23  
+
+Consider finite size effect to reduce the error caused by limited data
