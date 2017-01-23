@@ -19,9 +19,9 @@ def estimate_fse(filename, class_t, folder):
     f_alfa = [method_dcca.f_alfa, method_dcca_rand.f_alfa, method_dcca_surr.f_alfa]
     size_t = 10
     plt.figure()
-    plt.scatter(alfa[0], f_alfa[0], s = size_t, c = 'b', edgecolors = 'none', label='A origin')
-    plt.scatter(alfa[1], f_alfa[1], s = size_t, c = 'r', edgecolors = 'none', label='A random')
-    plt.scatter(alfa[2], f_alfa[2], s = size_t, c = 'y', edgecolors = 'none', label='A surrogate')
+    plt.scatter(alfa[0], f_alfa[0], s = size_t, c = 'b', edgecolors = 'none', label='origin')
+    plt.scatter(alfa[1], f_alfa[1], s = size_t, c = 'r', edgecolors = 'none', label='random')
+    plt.scatter(alfa[2], f_alfa[2], s = size_t, c = 'y', edgecolors = 'none', label='surrogate')
     plt.xlabel('alfa')
     plt.ylabel('f_alfa')
     plt.legend(loc = 'lower left')
