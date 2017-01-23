@@ -31,7 +31,7 @@ def estimate_fse(filename, class_t, folder):
     print('random', max(method_dcca_rand.alfa)-min(method_dcca_rand.alfa))
     print('surrogate', max(method_dcca_surr.alfa)-min(method_dcca_surr.alfa))
 
-current_dir = 'C:\\Users\\xueni\\Documents\\GitHub\\time-series-research\\data'
+current_dir = 'data'
 for root, dirs, files in os.walk(current_dir):
     for file in files:
         estimate_fse(file, MF_DCCA, 'fse_dcca\\')

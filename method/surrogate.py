@@ -94,8 +94,8 @@ def FSE_init(filename):
     df_random = reader.iloc[np.random.permutation(len(reader))]
     key_list = [key for key in reader]
     list_t = [reader[key].values for key in reader]
-    #tmp_surr = AAFT_surrogates(np.array(list_t))
-    tmp_surr = refined_AAFT_surrogates(np.array(list_t), 20)
+    tmp_surr = AAFT_surrogates(np.array(list_t))
+    #tmp_surr = refined_AAFT_surrogates(np.array(list_t), 10)
     surrogated = {}
     for i in range(len(key_list)): surrogated[key_list[i]] = tmp_surr[i]
     df_surr = pd.DataFrame(surrogated)
