@@ -9,10 +9,10 @@ from scipy.special import gamma
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
-class DPXA(object):
-    def __init__(self, min_q, max_q, bandwith, filename):
+class MF_DPXA(object):
+    def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        reader = pd.read_csv(filename)
+        #reader = pd.read_csv(filename)
         #print(reader)
         self.x_data = diff(log(reader.X.values)).tolist()
         self.y_data = diff(log(reader.Y.values)).tolist()
@@ -21,7 +21,10 @@ class DPXA(object):
         self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]        
         self.length = len(self.x_data)
         self.hurst_list = []
-        self.fig = 'graph\\' + filename + '_log.jpg'
+        self.tau = None
+        self.alfa = None
+        self.f_alfa = None
+        #self.fig = 'graph\\' + filename + '_log.jpg'
 
     def _fit_residual(self, degree, x_wins, y_wins, z_wins, r_x, step_t):
         num_wins = len(x_wins)
@@ -58,7 +61,7 @@ class DPXA(object):
     def generate(self):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
-        step_list = [k for k in range(20, int(self.length/4))]
+        step_list = [k for k in range(15, int(self.length/2), 10)]
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:
@@ -82,65 +85,16 @@ class DPXA(object):
             x_log = log(step_list)
             F_log = log(F_q)
             y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
-            coef = polyfit(x_log, y_log, 1)
+            coef = polyfit(x_log, F_log, 1)
             #plot2 = plt.plot(x_log, y_log, label='trend')
             self.hurst_list.append(coef[0])
         #plt.savefig(self.fig)
         #print(self.hurst_list)
         #self.plot(self.hurst_list)
-        
-A = DPXA(-5, 5, 10, 'period2_1.csv')
-A.generate()
-B = DPXA(-5, 5, 10, 'period2_2.csv')
-B.generate()
-C = DPXA(-5, 5, 10, 'period2_3.csv')
-C.generate()
-flist = A.flist
-f_length = len(flist)
-hurst_list = [A.hurst_list, B.hurst_list, C.hurst_list]
-colors = np.random.rand(3)
-size_t = 10
-#print(A.hurst_lista)
-#print(B.hurst_list)
-#print(C.hurst_list)
-#----------------------q vs. H_q
-plt.figure()
-plt.scatter(flist, hurst_list[0], s = size_t, c = 'b', edgecolors = 'none', label='A data')
-plt.scatter(flist, hurst_list[1], s = size_t, c = 'r', edgecolors = 'none', label='B data')
-plt.scatter(flist, hurst_list[2], s = size_t, c = 'y', edgecolors = 'none', label='C data')
-plt.xlabel('q')
-plt.ylabel('H_q')
-plt.legend(loc = 'best')
-plt.savefig('Hq_q2.jpg')
+        f_length = len(self.flist)
+        self.tau = [self.flist[i]*self.hurst_list[i]-1 for i in range(f_length)]
+        tmp = diff(self.tau)
+        tmp2 = diff(self.flist)
+        self.alfa = np.divide(tmp, tmp2)
+        self.f_alfa = [self.flist[i]*self.alfa[i]-self.tau[i] for i in range(f_length-1)]
 
-#----------------------q vs. tau
-plt.figure()
-tau = [[flist[i]*hurst_list[k][i]-1 for i in range(f_length)] for k in [0,1,2]]
-#tau = [self.flist[i]*hurst_list[i]-(self.flist[i]*hurst_list[i]-1)/(self.flist[i]-1) for i in range(f_length)]
-plt.scatter(flist, tau[0], s = size_t, c = 'b', edgecolors = 'none', label='A data')
-plt.scatter(flist, tau[1], s = size_t, c = 'r', edgecolors = 'none', label='B data')
-plt.scatter(flist, tau[2], s = size_t, c = 'y', edgecolors = 'none', label='C data')
-plt.xlabel('q')
-plt.ylabel('tau')
-plt.legend(loc = 'lower right')
-plt.savefig('tau_q2.jpg')
-#----------------------alfa vs. f_alfa
-tmp = diff(tau)
-tmp2 = diff(flist)
-#print(np.divide(tmp, tmp2))
-alfa = np.divide(tmp, tmp2)
-for k in alfa: print(max(k)-min(k))
-#alfa = [tmp1[i]/tmp2[i] for i in range(f_length-1)]
-#diff_list = [tmp1[i]/tmp2[i] for i in range(f_length-1)]
-#alfa = [diff_list[i]*self.flist[i]+hurst_list[i] for i in range(f_length-1)]
-#f_alfa = [diff_list[i]*self.flist[i]**2+1 for i in range(f_length-1)]
-f_alfa = [[flist[i]*alfa[k][i]-tau[k][i] for i in range(f_length-1)] for k in [0,1,2]]
-#f_alfa = [self.flist[i]*alfa[i]-tau[i] for i in range(f_length-1)]
-plt.figure()
-plt.scatter(alfa[0], f_alfa[0], s = size_t, c = 'b', edgecolors = 'none', label='A data')
-plt.scatter(alfa[1], f_alfa[1], s = size_t, c = 'r', edgecolors = 'none', label='B data')
-plt.scatter(alfa[2], f_alfa[2], s = size_t, c = 'y', edgecolors = 'none', label='C data')
-plt.xlabel('alfa')
-plt.ylabel('f_alfa')
-plt.legend(loc = 'best')
-plt.savefig('f_alfa2.jpg')

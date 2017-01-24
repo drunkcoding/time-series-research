@@ -9,16 +9,19 @@ from scipy.special import gamma
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
-class DCCA(object):
-    def __init__(self, min_q, max_q, bandwith, filename):
+class MF_DCCA(object):
+    def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        reader = pd.read_csv(filename)
+        #reader = pd.read_csv(filename)
         #print(reader)
         self.x_data = diff(log(reader.X.values)).tolist()
-        self.y_data = diff(log(reader.Y.values)).tolist()      
+        self.y_data = diff(log(reader.Y.values)).tolist()   
         self.length = len(self.x_data)
         self.hurst_list = []
-        self.fig = filename + '_loglog.jpg'
+        self.tau = None
+        self.alfa = None
+        self.f_alfa = None
+        #self.fig = 'graph\\' + filename + '_log.jpg'
 
     def _fit_residual(self, degree, x_wins, y_wins, r_x, step_t):
         num_wins = len(x_wins)
@@ -45,11 +48,11 @@ class DCCA(object):
             a.pop()
             b.pop()
         return a+b
-        
+
     def generate(self):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
-        step_list = [k for k in range(20, int(self.length/2))]
+        step_list = [k for k in range(15, int(self.length/2), 10)]
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:
@@ -64,21 +67,22 @@ class DCCA(object):
             corr_list.append(self._fit_residual(7, x_wins, y_wins, r_x, step_t))
         #plt.figure()
         expected = lambda n: 1/sqrt(n*np.pi/2)*sum([sqrt((n-i)/i) for i in range(1,n)]) if n >=340 else 1/sqrt(np.pi)/gamma(n/2)*gamma((n-1)/2)*sum([sqrt((n-i)/i) for i in range(1,n)])
-        F_q = [element[len(self.flist)-4] for element in corr_list]
-        x_log = log(step_list)
-        F_log = log(F_q)
-        y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
-        coef = polyfit(x_log, y_log, 1)
-        print(coef[0])
-        self.hurst_list.append(coef[0])
+        for i in range(len(self.flist)):
+            F_q = [element[i] for element in corr_list]
+            #print(F_q)
+            x_log = log(step_list)
+            F_log = log(F_q)
+            y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
+            coef = polyfit(x_log, F_log, 1)
+            #plot2 = plt.plot(x_log, y_log, label='trend')
+            self.hurst_list.append(coef[0])
         #plt.savefig(self.fig)
         #print(self.hurst_list)
         #self.plot(self.hurst_list)
+        f_length = len(self.flist)
+        self.tau = [self.flist[i]*self.hurst_list[i]-1 for i in range(f_length)]
+        tmp = diff(self.tau)
+        tmp2 = diff(self.flist)
+        self.alfa = np.divide(tmp, tmp2)
+        self.f_alfa = [self.flist[i]*self.alfa[i]-self.tau[i] for i in range(f_length-1)]
         
-A = DCCA(-5, 5, 1, 'period2_1.csv')
-A.generate()
-B = DCCA(-5, 5, 1, 'period2_2.csv')
-B.generate()
-C = DCCA(-5, 5, 1, 'period2_3.csv')
-C.generate()
-
