@@ -23,7 +23,6 @@ def acf(x, nlags=40, alpha=0.05):
     nobs = len(x)  # should this shrink for missing='drop' and NaNs in x?
     avf = acovf(x)
     acf = avf[:nlags + 1] / avf[0]
-    
     varacf = np.ones(nlags + 1) / nobs
     varacf[0] = 0
     varacf[1] = 1. / nobs
@@ -57,12 +56,13 @@ plt.xcorr(close, close_t, usevlines=True, maxlags=100, normed=True, lw=2)
 plt.axis([0,100,-0.5,0.5])
 plt.show()
 '''
-
-pacf_t = acf(close, nlags=300)
+end = len(mean_c)-1
+pacf_t = acf(close, nlags=end)
 #x_t = [k for k in range(pacf_t)]
 plt.figure()
 #plt.acorr(np.absolute(close_t), maxlags=200)
-plt.acorr(mean_c, maxlags=300)
-plt.axis([0,300,0,1])
+
+plt.acorr(mean_c, maxlags=end)
+plt.axis([0,end,0,1])
 plt.show()
-for k in pacf_t: print(k)
+#for k in pacf_t: print(k)
