@@ -1,22 +1,23 @@
-# coding: utf-8
 import pandas as pd
 import numpy as np
-from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor, cumsum, diff, mean, subtract, multiply, square, absolute
-from numpy.linalg import lstsq, inv
+from numpy import polyfit, polyval, power, sqrt, absolute, log, mean, subtract, diff
+#from scipy.special import gamma
 import matplotlib.pyplot as plt
-from scipy.special import gamma
 from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
-class MF_DCCA(object):
+class MF_DFA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
         #reader = pd.read_csv(filename)
         #print(reader)
         self.x_data = diff(log(reader.X.values)).tolist()
-        self.y_data = diff(log(reader.Y.values)).tolist()   
+        #self.y_data = diff(log(reader.Y.values)).tolist()
+        del reader['X']
+        #del reader['Y']
+        #self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]        
         self.length = len(self.x_data)
         self.hurst_list = []
         self.tau = None
@@ -24,31 +25,15 @@ class MF_DCCA(object):
         self.f_alfa = None
         #self.fig = 'graph\\' + filename + '_log.jpg'
 
-    def _fit_residual(self, degree, x_wins, y_wins, r_x, step_t):
-        num_wins = len(x_wins)
-        nroot = lambda x, q: exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
-        corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2) )), axis = 1)
-        x_profile = cumsum(x_wins, axis = 1)
-        y_profile = cumsum(y_wins, axis = 1)
-        #r_x = [k for k in range(step_t)]
-        x_trend_coef = [polyfit(r_x[i], x_profile[i], degree) for i in range(num_wins)]
-        y_trend_coef = [polyfit(r_x[i], y_profile[i], degree) for i in range(num_wins)]
-        x_trend = [polyval(x_trend_coef[i], r_x[i]) for i in range(num_wins)]
+    def fit_residual(degree, y_wins, r_x, step_t):
+        num_wins = len(y_wins)
+        nroot = lambda x, q: power(mean(power(x, q/2.0)), 1.0/q)
+        corr = lambda x1, x2: mean(power(subtract(x1, x2), 2 ), axis = 1)
+        y_trend_coef = [polyfit(r_x[i], y_wins[i], degree) for i in range(num_wins)]
         y_trend = [polyval(y_trend_coef[i], r_x[i]) for i in range(num_wins)]
-        corr_wins = corr(x_profile, x_trend, y_profile, y_trend)
-        #print(step_t, corr_wins)
-        q_order_corr = [nroot(corr_wins, q) for q in self.flist]
-        return q_order_corr
-
-    def partition(self, list_t, step_t, num_wins):
-        len_t = len(list_t)
-        a = [list_t[i:i+step_t] for i in range(0,len_t,step_t)]
-        list_t.reverse()
-        b = [list_t[i:i+step_t] for i in range(0,len_t,step_t)]
-        if num_wins*step_t != len_t:
-            a.pop()
-            b.pop()
-        return a+b
+        corr_wins = corr(y_wins, y_trend)
+        return [nroot(corr_wins, q) for q in flist]
+        #return nroot(corr_wins, 2)
 
     def generate(self):
         base = 2
@@ -57,20 +42,17 @@ class MF_DCCA(object):
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:
-            num_wins = int(floor(self.length/step_t))
-            #end_range = (num_wins-1)*step_t
-            #start_range = self.length-end_range
-            x_wins = self.partition(self.x_data, step_t, num_wins)
-            y_wins = self.partition(self.y_data, step_t, num_wins)
-            #z_wins = partition(self.z_data, start_range, end_range, step_t)
-            tmp = [i for i in range(1, num_wins*step_t+1)]
-            r_x = self.partition(tmp, step_t, num_wins)
-            corr_list.append(self._fit_residual(7, x_wins, y_wins, r_x, step_t))
-        #plt.figure()
+            num_wins = int(np.floor(length/step_t))
+            mean_t = np.mean(x_data)
+            x_data = np.subtract(x_data, mean_t)
+            y_data = np.cumsum(x_data)
+            y_wins = partition(y_data.tolist(), step_t, num_wins)
+            tmp = [i for i in range(1, num_wins*2*step_t+1)]
+            r_wins = partition(tmp, step_t, num_wins)
+            corr_list.append(fit_residual(1, y_wins, r_wins, step_t))
         expected = lambda n: 1/sqrt(n*np.pi/2)*sum([sqrt((n-i)/i) for i in range(1,n)]) if n >=340 else 1/sqrt(np.pi)/gamma(n/2)*gamma((n-1)/2)*sum([sqrt((n-i)/i) for i in range(1,n)])
         for i in range(len(self.flist)):
             F_q = [element[i] for element in corr_list]
-            #print(F_q)
             x_log = log(step_list)
             F_log = log(F_q)
             y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
@@ -86,4 +68,3 @@ class MF_DCCA(object):
         tmp2 = diff(self.flist)
         self.alfa = np.divide(tmp, tmp2)
         self.f_alfa = [self.flist[i]*self.alfa[i]-self.tau[i] for i in range(f_length-1)]
-        

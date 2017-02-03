@@ -5,6 +5,7 @@ from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor
 from numpy.linalg import lstsq, inv
 import matplotlib.pyplot as plt
 from scipy.special import gamma
+from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
