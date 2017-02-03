@@ -11,8 +11,6 @@ warnings.simplefilter('ignore', np.RankWarning)
 class MF_DFA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        #reader = pd.read_csv(filename)
-        #print(reader)
         self.x_data = diff(log(reader.X.values)).tolist()
         #self.y_data = diff(log(reader.Y.values)).tolist()
         del reader['X']
@@ -39,7 +37,6 @@ class MF_DFA(object):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
         step_list = [k for k in range(15, int(self.length/2), 10)]
-        #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:
             num_wins = int(np.floor(length/step_t))
