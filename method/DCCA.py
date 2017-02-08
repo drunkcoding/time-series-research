@@ -5,6 +5,7 @@ from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor
 from numpy.linalg import lstsq, inv
 import matplotlib.pyplot as plt
 from scipy.special import gamma
+from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
@@ -12,8 +13,6 @@ warnings.simplefilter('ignore', np.RankWarning)
 class MF_DCCA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        #reader = pd.read_csv(filename)
-        #print(reader)
         self.x_data = diff(log(reader.X.values)).tolist()
         self.y_data = diff(log(reader.Y.values)).tolist()   
         self.length = len(self.x_data)
