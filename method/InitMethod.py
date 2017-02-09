@@ -38,4 +38,9 @@ def unit_root_test(df, remove = None):
         orders[index-1].append(series)
     return orders
     
-
+def cointegration_test(s1, s2):
+    if (len(s1) != len(s2)): return None
+    reg = OLS(s1, s2).fit()
+    residual = lambda param, y, x: np.subtract(y, np.multiply(param, x))
+    result = adfuller(residual(reg.params, s1, s2))
+    return (result[i][0]-result[i][4]['1%']) < 0
