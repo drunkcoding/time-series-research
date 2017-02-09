@@ -46,6 +46,11 @@ def cointegration_test(s1, s2):
     result = adfuller(residual(reg.params, s1, s2))
     return (result[i][0]-result[i][4]['1%']) < 0
 
+def subtract_mean(L):
+    mean_t = np.mean(L)
+    return np.subtract(L, mean_t)
+
+
 
 class MAP(object):
     def __init__(self, reader, remove = None):
