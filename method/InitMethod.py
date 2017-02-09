@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.regression.linear_model import OLS
+from sklearn.preprocessing import normalize
 
 def partition(list_t, step_t, num_wins):
     len_t = len(list_t)
@@ -44,3 +45,30 @@ def cointegration_test(s1, s2):
     residual = lambda param, y, x: np.subtract(y, np.multiply(param, x))
     result = adfuller(residual(reg.params, s1, s2))
     return (result[i][0]-result[i][4]['1%']) < 0
+
+
+class MAP(object):
+    def __init__(self, reader, remove = None):
+        self.reader = reader.dropna()
+        self.reader.dropna()
+        for key in remove: del self.reader[key]
+
+    def score(self, edges, X):
+        tmp_e = deepcopy(edges)
+        tmp_e.append(X)
+        tmp_e = sorted(tmp_e)
+        cnt = 0
+        while X > tmp_e[cnt]: 
+            cnt += 1
+            if cnt == len(tmp_e): break
+        return cnt+1
+
+    def try_t(self, Indx, L, step_t):
+        tmp = sorted(L[Indx-step_t:Indx])
+        return score(tmp, L[Indx])
+
+    def generate(self, step_t):
+        make = lambda L: [try_t(i, L, step_t) for i in range(step_t, length)]
+        total = [make(self.reader[key].values) for key in self.reader]
+        total = normalize(total, norm='max')
+        return total, [key for key in self.reader]
