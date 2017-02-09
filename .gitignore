@@ -217,3 +217,4 @@ pip-log.txt
 
 # Python cache files
 method/__pycache__/
+*.pyc
