@@ -1,3 +1,3 @@
-from method.InitMethod import stock_data
+from method.InitMethod import stock_base_data
 
-stock_data([])
+stock_base_data()

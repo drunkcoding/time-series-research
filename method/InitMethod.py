@@ -51,9 +51,13 @@ def subtract_mean(L):
     mean_t = np.mean(L)
     return np.subtract(L, mean_t)
 
-def stock_data(name_list):
+def stock_base_data(time = 0):
     stock_base = ts.get_stock_basics()
-    pd.to_excel('stock_base.xlsx')
+    length = len(stock_base.index)
+    drop_list = [x for x in range(length) if stock_base['holders'][x] == 0 or stock_base['timeToMarket'][x] <= 0]
+    #print (drop_list)
+    stock_base = stock_base.drop(stock_base.index[drop_list])
+    stock_base.to_excel('stock_base.xlsx')
 
 class MAP(object):
     def __init__(self, reader, remove = None):
