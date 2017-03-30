@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import tushare as ts
+import os
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.regression.linear_model import OLS
 from sklearn.preprocessing import normalize
@@ -15,7 +16,7 @@ def partition(list_t, step_t, num_wins):
         b.pop()
     return a+b
 
-def merge_excel(dirct, key):
+def merge_excel(dirct, key='date'):
     tmp_excels = []
     for root, dirs, files in os.walk(dirct):
         for file in files:
@@ -39,7 +40,7 @@ def unit_root_test(df, remove = None):
             if hypo < 0: break
         orders[index-1].append(series)
     return orders
-    
+
 def cointegration_test(s1, s2):
     if (len(s1) != len(s2)): return None
     reg = OLS(s1, s2).fit()
@@ -51,13 +52,31 @@ def subtract_mean(L):
     mean_t = np.mean(L)
     return np.subtract(L, mean_t)
 
-def stock_base_data(time = 0):
+def stock_base_data(dic='data\\Chinese_Stock\\', time=0):
+    """
+    return selected stock code and general data
+    """
     stock_base = ts.get_stock_basics()
     length = len(stock_base.index)
-    drop_list = [x for x in range(length) if stock_base['holders'][x] == 0 or stock_base['timeToMarket'][x] <= 0]
+    drop_list = [x for x in range(length) \
+    if stock_base['holders'][x] == 0 or stock_base['timeToMarket'][x] >= time]
     #print (drop_list)
     stock_base = stock_base.drop(stock_base.index[drop_list])
-    stock_base.to_excel('stock_base.xlsx')
+    #length = len(stock_base['pe'])
+    #df = pd.DataFrame(index=[x for x in range(length)])
+    #stock_base.insert(0, 'index', [x for x in range(length)])
+    #stock_base = pd.merge(df, stock_base)
+    stock_base.dropna()
+    stock_base.to_excel(dic + 'stock_base.xlsx')
+    return stock_base
+
+def select_data(df, dic='data\\Chinese_Stock\\data_code\\'):
+    code_list = df.index.values.tolist()
+    for x in code_list: 
+        tmp = ts.get_k_data(x)
+        tmp = tmp.dropna()
+        tmp.to_excel(dic+x+'.xlsx')
+
 
 class MAP(object):
     def __init__(self, reader, remove = None):
