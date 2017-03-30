@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import tushare as ts
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.regression.linear_model import OLS
 from sklearn.preprocessing import normalize
@@ -50,7 +51,9 @@ def subtract_mean(L):
     mean_t = np.mean(L)
     return np.subtract(L, mean_t)
 
-
+def stock_data(name_list):
+    stock_base = ts.get_stock_basics()
+    pd.to_excel('stock_base.xlsx')
 
 class MAP(object):
     def __init__(self, reader, remove = None):
@@ -77,3 +80,5 @@ class MAP(object):
         total = [make(self.reader[key].values) for key in self.reader]
         total = normalize(total, norm='max')
         return total, [key for key in self.reader]
+
+
