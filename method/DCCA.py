@@ -5,7 +5,7 @@ from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor
 from numpy.linalg import lstsq, inv
 import matplotlib.pyplot as plt
 from scipy.special import gamma
-from InitMethod import partition
+#from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
@@ -13,8 +13,9 @@ warnings.simplefilter('ignore', np.RankWarning)
 class MF_DCCA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        self.x_data = diff(log(reader.X.values)).tolist()
-        self.y_data = diff(log(reader.Y.values)).tolist()   
+        #print(np.log(reader.X.values.tolist()))
+        self.x_data = diff(np.log(reader.X.values.tolist())).tolist()
+        self.y_data = diff(np.log(reader.Y.values.tolist())).tolist()   
         self.length = len(self.x_data)
         self.hurst_list = []
         self.cov_list = []
@@ -49,11 +50,42 @@ class MF_DCCA(object):
             a.pop()
             b.pop()
         return a+b
+    
+    def _cal_profile(self, data):
+        mean_t = mean(data)
+        tmp = subtract(data, mean_t)
+        return cumsum(tmp)
+    
+    def _cal_diff(self, profile, step_t):
+        length = len(profile)
+        difference = []
+        for i in range(length-step_t):
+            window = profile[i:i+step_t]
+            r_x = [x for x in range(i, i+step_t)]
+            trend_coef = polyfit(r_x, window, 7)
+            trend = polyval(trend_coef, r_x)
+            difference.append(subtract(window, trend))
+        return difference
+    
+    def _cal_var(self, X, Y):
+        multi = multiply(X, Y)
+        return mean(multi)
+
+    def corr_coef(self):
+        step_list = [k for k in range(15, 2000, 10)]
+        profile_x = self._cal_profile(self.x_data)
+        profile_y = self._cal_profile(self.y_data)
+        for step_t in step_list:
+            diff_x = self._cal_diff(profile_x, step_t)
+            diff_y = self._cal_diff(profile_y, step_t)
+            self.cov_list.append(self._cal_var(diff_x, diff_y)/self._cal_var(diff_y, diff_y)/self._cal_var(diff_x, diff_x))
+
 
     def generate(self):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
         step_list = [k for k in range(15, int(self.length/2), 10)]
+        #step_list = [k for k in range(15, 2000, 10)]
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:

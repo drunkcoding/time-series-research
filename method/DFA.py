@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from numpy import polyfit, polyval, power, sqrt, absolute, log, mean, subtract, diff
-#from scipy.special import gamma
+from scipy.special import gamma
 import matplotlib.pyplot as plt
-from InitMethod import partition
+#from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
@@ -11,7 +11,7 @@ warnings.simplefilter('ignore', np.RankWarning)
 class MF_DFA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
         self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        self.x_data = diff(log(reader.X.values)).tolist()
+        self.x_data = diff(log(reader.X.values.tolist())).tolist()
         #self.y_data = diff(log(reader.Y.values)).tolist()
         del reader['X']
         #del reader['Y']
@@ -24,31 +24,43 @@ class MF_DFA(object):
         self.f_alfa = None
         #self.fig = 'graph\\' + filename + '_log.jpg'
 
-    def fit_residual(degree, y_wins, r_x, step_t):
+    def fit_residual(self, degree, y_wins, r_x, step_t):
         num_wins = len(y_wins)
-        nroot = lambda x, q: power(mean(power(x, q/2.0)), 1.0/q)
+        nroot = lambda x, q: np.exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
         corr = lambda x1, x2: mean(power(subtract(x1, x2), 2 ), axis = 1)
         y_trend_coef = [polyfit(r_x[i], y_wins[i], degree) for i in range(num_wins)]
         y_trend = [polyval(y_trend_coef[i], r_x[i]) for i in range(num_wins)]
         corr_wins = corr(y_wins, y_trend)
         self.cov_list.append(mean(corr_wins))
-        return [nroot(corr_wins, q) for q in flist]
+        return [nroot(corr_wins, q) for q in self.flist]
         #return nroot(corr_wins, 2)
+    
+    def partition(self, list_t, step_t, num_wins):
+        len_t = len(list_t)
+        a = [list_t[i:i+step_t] for i in range(0,len_t,step_t)]
+        list_t.reverse()
+        b = [list_t[i:i+step_t] for i in range(0,len_t,step_t)]
+        if num_wins*step_t != len_t:
+            a.pop()
+            b.pop()
+        return a+b
+
 
     def generate(self):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
         step_list = [k for k in range(15, int(self.length/2), 10)]
+        #step_list = [k for k in range(15, 2000, 10)]
         corr_list = []
         for step_t in step_list:
-            num_wins = int(np.floor(length/step_t))
-            mean_t = np.mean(x_data)
-            x_data = np.subtract(x_data, mean_t)
+            num_wins = int(np.floor(self.length/step_t))
+            mean_t = np.mean(self.x_data)
+            x_data = np.subtract(self.x_data, mean_t)
             y_data = np.cumsum(x_data)
-            y_wins = partition(y_data.tolist(), step_t, num_wins)
+            y_wins = self.partition(y_data.tolist(), step_t, num_wins)
             tmp = [i for i in range(1, num_wins*2*step_t+1)]
-            r_wins = partition(tmp, step_t, num_wins)
-            corr_list.append(fit_residual(1, y_wins, r_wins, step_t))
+            r_wins = self.partition(tmp, step_t, num_wins)
+            corr_list.append(self.fit_residual(7, y_wins, r_wins, step_t))
         expected = lambda n: 1/sqrt(n*np.pi/2)*sum([sqrt((n-i)/i) for i in range(1,n)]) if n >=340 else 1/sqrt(np.pi)/gamma(n/2)*gamma((n-1)/2)*sum([sqrt((n-i)/i) for i in range(1,n)])
         for i in range(len(self.flist)):
             F_q = [element[i] for element in corr_list]
