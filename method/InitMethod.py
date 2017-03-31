@@ -25,15 +25,24 @@ def merge_excel(dirct, key='date'):
     for i in range(2, len(tmp_excels)): tmp = pd.merge(tmp, tmp_excels[i], on=key)
     return tmp
 
+def combine_excels(df1, df2, key='close'):
+    new_data = lambda df, label: pd.DataFrame(np.transpose([df.date.values, df[key].values]), \
+    columns=['date', label])
+    tmp_df1 = new_data(df1, 'X')
+    tmp_df2 = new_data(df2, 'Y')
+    tmp_dfx = new_data(df2, 'X')
+    tmp = pd.merge(tmp_df1, tmp_df2, on='date')        
+    return tmp, tmp_df1, tmp_dfx
+
 def unit_root_test(df, remove = None):
     for key in remove: del df[key]
-    check = lambda x: True if len(x)==0 else max(x) < 0
+    #check = lambda x: True if len(x) == 0 else max(x) < 0
     orders = {}
     for key in df:
         index = 0
         series = df[key].values
         while True:
-            if index>0: series = np.diff(series)
+            if index > 0: series = np.diff(series)
             result = adfuller(series)
             hypo = result[i][0]-result[i][4]['1%']
             index += 1
@@ -72,9 +81,13 @@ def stock_base_data(dic='data\\Chinese_Stock\\', time=0):
 
 def select_data(df, dic='data\\Chinese_Stock\\data_code\\'):
     code_list = df.code.values
-    print(code_list)
+    #print(code_list)
     for x in code_list:
-        tmp = ts.get_k_data(x, start='2000-01-01')
+        #print(x)
+        try:
+            tmp = ts.get_k_data(x, start='2000-01-01')
+        except:
+            pass
         tmp = tmp.dropna()
         tmp.to_excel(dic+x+'.xlsx')
 
