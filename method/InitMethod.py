@@ -71,9 +71,10 @@ def stock_base_data(dic='data\\Chinese_Stock\\', time=0):
     return stock_base
 
 def select_data(df, dic='data\\Chinese_Stock\\data_code\\'):
-    code_list = df.index.values.tolist()
-    for x in code_list: 
-        tmp = ts.get_k_data(x)
+    code_list = df.code.values
+    print(code_list)
+    for x in code_list:
+        tmp = ts.get_k_data(x, start='2000-01-01')
         tmp = tmp.dropna()
         tmp.to_excel(dic+x+'.xlsx')
 
