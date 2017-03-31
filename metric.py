@@ -23,6 +23,15 @@ for i in range(num_files):
         tmp_df1 = pd.read_excel(data_dir + files[i])
         tmp_df2 = pd.read_excel(data_dir + files[j])
         tmp, tmp_dfx, tmp_dfy = combine_excels(tmp_df1, tmp_df2)
-        func_dcca = MF_DCCA(-5, 5, 1, tmp)
+        func_dcca = MF_DCCA(-5, 5, 1, tmp)  
         func_dfax = MF_DFA(-5, 5, 1, tmp_dfx)
         func_dfay = MF_DFA(-5, 5, 1, tmp_dfy)
+        func_dcca.generate()
+        func_dfax.generate()
+        func_dfay.generate()
+        cov_dcca = func_dcca.cov_list
+        cov_dfax = func_dcca.cov_list
+        cov_dfay = func_dcca.cov_list
+        coef = np.divide(cov_dcca, np.multiply(cov_dfax, cov_dfay))
+
+

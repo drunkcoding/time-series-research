@@ -18,6 +18,7 @@ class MF_DFA(object):
         #self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]        
         self.length = len(self.x_data)
         self.hurst_list = []
+        self.cov_list = []
         self.tau = None
         self.alfa = None
         self.f_alfa = None
@@ -30,6 +31,7 @@ class MF_DFA(object):
         y_trend_coef = [polyfit(r_x[i], y_wins[i], degree) for i in range(num_wins)]
         y_trend = [polyval(y_trend_coef[i], r_x[i]) for i in range(num_wins)]
         corr_wins = corr(y_wins, y_trend)
+        self.cov_list.append(mean(corr_wins))
         return [nroot(corr_wins, q) for q in flist]
         #return nroot(corr_wins, 2)
 

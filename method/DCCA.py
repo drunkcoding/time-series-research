@@ -17,6 +17,7 @@ class MF_DCCA(object):
         self.y_data = diff(log(reader.Y.values)).tolist()   
         self.length = len(self.x_data)
         self.hurst_list = []
+        self.cov_list = []
         self.tau = None
         self.alfa = None
         self.f_alfa = None
@@ -35,6 +36,7 @@ class MF_DCCA(object):
         y_trend = [polyval(y_trend_coef[i], r_x[i]) for i in range(num_wins)]
         corr_wins = corr(x_profile, x_trend, y_profile, y_trend)
         #print(step_t, corr_wins)
+        self.cov_list.append(mean(corr_wins))
         q_order_corr = [nroot(corr_wins, q) for q in self.flist]
         return q_order_corr
 
