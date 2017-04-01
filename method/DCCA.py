@@ -52,17 +52,23 @@ class MF_DCCA(object):
         return a+b
 
     def _cal_profile(self, data):
+        """
+        distributance profile
+        """
         mean_t = mean(data)
         tmp = subtract(data, mean_t)
         return cumsum(tmp)
 
     def _cal_diff(self, profile, step_t):
+        """
+        difference between profile and local trend
+        """
         length = len(profile)
         difference = []
         for i in range(length-step_t):
             window = profile[i:i+step_t]
             r_x = [x for x in range(i, i+step_t)]
-            trend_coef = polyfit(r_x, window, 7)
+            trend_coef = polyfit(r_x, window, 1)
             trend = polyval(trend_coef, r_x)
             difference.append(subtract(window, trend))
         return difference
@@ -72,7 +78,8 @@ class MF_DCCA(object):
         return mean(multi)
 
     def corr_coef(self):
-        step_list = [k for k in range(10, 2000, 10)]
+        step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 2500]   #按照交易日均线
+        #[k for k in range(15, 2000, 10)]
         profile_x = self._cal_profile(self.x_data)
         profile_y = self._cal_profile(self.y_data)
         for step_t in step_list:
