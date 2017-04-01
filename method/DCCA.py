@@ -50,12 +50,12 @@ class MF_DCCA(object):
             a.pop()
             b.pop()
         return a+b
-    
+
     def _cal_profile(self, data):
         mean_t = mean(data)
         tmp = subtract(data, mean_t)
         return cumsum(tmp)
-    
+
     def _cal_diff(self, profile, step_t):
         length = len(profile)
         difference = []
@@ -66,19 +66,19 @@ class MF_DCCA(object):
             trend = polyval(trend_coef, r_x)
             difference.append(subtract(window, trend))
         return difference
-    
+
     def _cal_var(self, X, Y):
         multi = multiply(X, Y)
         return mean(multi)
 
     def corr_coef(self):
-        step_list = [k for k in range(15, 2000, 10)]
+        step_list = [k for k in range(10, 2000, 10)]
         profile_x = self._cal_profile(self.x_data)
         profile_y = self._cal_profile(self.y_data)
         for step_t in step_list:
             diff_x = self._cal_diff(profile_x, step_t)
             diff_y = self._cal_diff(profile_y, step_t)
-            self.cov_list.append(self._cal_var(diff_x, diff_y)/self._cal_var(diff_y, diff_y)/self._cal_var(diff_x, diff_x))
+            self.cov_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
 
 
     def generate(self):
