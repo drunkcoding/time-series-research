@@ -78,7 +78,7 @@ class MF_DCCA(object):
         return mean(multi)
 
     def corr_coef(self):
-        step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750, 2500]   #按照交易日均线
+        step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]   #按照交易日均线
         #[k for k in range(15, 2000, 10)]
         profile_x = self._cal_profile(self.x_data)
         profile_y = self._cal_profile(self.y_data)

@@ -6,10 +6,15 @@ dir_base = 'data\\Chinese_Stock\\'
 data_dir = dir_base + 'data_code\\'
 
 
-#stock_base = stock_base_data(time = 20000000)
+#stock_base = stock_base_data(time = 20130000)
 
 stock_base = pd.read_excel(dir_base+'stock_base.xlsx', converters={'code': lambda x: str(x)})
-select_data(stock_base)
+stock_base = stock_base.dropna()
+stock_base.to_excel(dir_base + 'lead.xlsx')
+#select_data(stock_base)
+
+
+
 """
 files = os.listdir(data_dir)
 
