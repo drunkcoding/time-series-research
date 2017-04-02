@@ -83,9 +83,9 @@ def select_data(df, dic='data\\Chinese_Stock\\data_code\\'):
     code_list = df.code.values
     #print(code_list)
     for x in code_list:
-        #print(x)
+        print(x)
         try:
-            tmp = ts.get_k_data(x, start='2000-01-01')
+            tmp = ts.get_k_data(x, start='2000-01-01', autype=None)
         except:
             pass
         tmp = tmp.dropna()

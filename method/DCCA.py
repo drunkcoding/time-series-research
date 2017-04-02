@@ -68,7 +68,7 @@ class MF_DCCA(object):
         for i in range(length-step_t):
             window = profile[i:i+step_t]
             r_x = [x for x in range(i, i+step_t)]
-            trend_coef = polyfit(r_x, window, 3)
+            trend_coef = polyfit(r_x, window, 7)
             trend = polyval(trend_coef, r_x)
             difference.append(subtract(window, trend))
         return difference
