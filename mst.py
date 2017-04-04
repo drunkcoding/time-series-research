@@ -21,13 +21,14 @@ for file in dists:
     G = nx.from_scipy_sparse_matrix(A, create_using=nx.MultiGraph())
 
     T = nx.minimum_spanning_tree(G)
+    pos_t = nx.spring_layout(T)
     labels = {}
     cnt = 0
     for node in T.nodes():
         labels[node] = files[cnt].split('.')[0]
         cnt += 1
     plt.figure()
-    nx.draw_networkx(T, pos=nx.spring_layout(T), with_labels=False, node_size = 15)
-    nx.draw_networkx_labels(T, nx.spring_layout(T), labels, font_size=6,font_color='r')
+    nx.draw_networkx(T, pos=pos_t, with_labels=False, node_size = 18, alpha=0.6)
+    nx.draw_networkx_labels(T, pos_t, labels, font_size=7,font_color='b')
     #plt.show()
     plt.savefig('graph\\\mst\\' + file.split('.')[0] + '.jpg')
