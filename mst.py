@@ -19,8 +19,8 @@ for file in dists:
     A = csr_matrix(dist.values.tolist())
     #A = csr_matrix([[1, 0.8, 0.9], [0.8, 1, 0.7], [0.9, 0.7, 1]])
     G = nx.from_scipy_sparse_matrix(A, create_using=nx.MultiGraph())
-
     T = nx.minimum_spanning_tree(G)
+    #print(0 in T)
     pos_t = nx.spring_layout(T)
     labels = {}
     cnt = 0
