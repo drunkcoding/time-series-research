@@ -7,38 +7,41 @@ import os
 dir_base = 'data\\Chinese_Stock\\'
 data_dir = dir_base + 'data_code\\'
 lead_dir = dir_base + 'lead\\'
+corr_dir = dir_base + 'corr\\'
+dist_dir = dir_base + 'dist\\'
 
 files = os.listdir(lead_dir)
 num_files = len(files)
-"""
-dcca_m = [[-2 for j in range(num_files)] for i in range(num_files)]
-for i in range(num_files):
-    dcca_m[i][i] = 1.0
-    for j in range(i+1,num_files):
-        tmp_df1 = pd.read_excel(data_dir + files[i])
-        tmp_df2 = pd.read_excel(data_dir + files[j])
+step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]
+unit_list = [[1.0 for i in range(num_files)] for j in range(num_files)]
 
-        dcca_m[i][j] = dcca_m[j][i] = cov_dcca
-"""
+s_len = len(step_list)
+dcca_m = [[[1.0 for j in range(num_files)] for i in range(num_files)] for k in range(s_len)]
 
-dcca_m = [[-2 for j in range(num_files)] for i in range(num_files)]
+df_list = {}
+pop_list = ['open', 'high', 'low', 'volume', 'code']
+for file in files: 
+    tmp = pd.read_excel(lead_dir + file)
+    for item in pop_list: del tmp[item]
+    df_list[file] = tmp
 for i in range(num_files):
-    dcca_m[i][i] = 1.0
-    for j in range(i+1,num_files):
-        tmp_df1 = pd.read_excel(lead_dir + files[i])
-        tmp_df2 = pd.read_excel(lead_dir + files[j])
-        tmp, tmp_dfx, tmp_dfy = combine_excels(tmp_df1, tmp_df2)
+    for j in range(i+1, num_files):
+        tmp = pd.merge(df_list[files[i]], df_list[files[j]], on='date')
+        del tmp['date']
+        tmp = tmp.dropna()
+        tmp.columns = ['X', 'Y']
         func_dcca = MF_DCCA(-5, 5, 1, tmp)  
         func_dcca.corr_coef()
         cov_dcca = func_dcca.cov_list
-        dcca_m[i][j] = cov_dcca
-        dcca_m[j][i] = cov_dcca
-        print(cov_dcca)
+        for k in range(s_len):
+            dcca_m[k][i][j] = cov_dcca[k]
+            dcca_m[k][j][i] = cov_dcca[k]
+        print(files[i]+files[j], end=' ')
+        print(cov_dcca, flush=True)
 
-df_corr = pd.DataFrame(dcca_m, columns=files, index=files)
-df_corr.to_excel(dir_base + 'corr.xlsx')
-
-dist = np.sqrt(np.multiply(2, np.subtract(1, df_corr)))
-df_dist = pd.DataFrame(dcca_m, columns=files, index=files)
-df_dist.to_excel(dir_base + 'dist.xlsx')
-
+for i in range(s_len):
+    df_corr = pd.DataFrame(dcca_m[i], columns=files, index=files)
+    df_corr.to_excel(corr_dir + 'corr_' + str(step_list[i]) + '.xlsx')
+    dist = np.sqrt(np.multiply(2, np.subtract(unit_list, dcca_m[i])))
+    df_dist = pd.DataFrame(dist, columns=files, index=files)
+    df_dist.to_excel(dist_dir + 'dist_' + str(step_list[i]) + '.xlsx')
