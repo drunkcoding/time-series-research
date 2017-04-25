@@ -11,8 +11,9 @@ lead_dir = dir_base + 'lead\\'
 #stock_base = pd.read_excel(dir_base+'stock_base.xlsx', converters={'code': lambda x: str(x)})
 #stock_base = stock_base.dropna()
 #stock_base.to_excel(dir_base + 'lead.xlsx')
-stock_base = pd.read_excel(dir_base + 'lead.xlsx', converters={'code': lambda x: str(x)})
-select_data(stock_base, dic=dir_base+'lead\\')
+stock_base = pd.read_excel(dir_base + 'stock_oil.xlsx',
+                           converters={'code': lambda x: str(x)})
+select_data(stock_base, dic=dir_base + 'oil\\')
 
 """
 files = os.listdir(data_dir)
@@ -30,4 +31,4 @@ for file in files:
 """
 #df = combine_excels(dir_base+'data_code\\')
 
-#df.to_excel(dir_base+'merged.xlsx')
+# df.to_excel(dir_base+'merged.xlsx')

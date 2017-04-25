@@ -10,7 +10,8 @@ lead_dir = dir_base + 'lead\\'
 dist_dir = dir_base + 'dist\\'
 dists = os.listdir(dist_dir)
 
-reader = pd.read_excel(dir_base + 'lead.xlsx', converters={'code': lambda x: str(x)})
+reader = pd.read_excel(dir_base + 'lead.xlsx',
+                       converters={'code': lambda x: str(x)})
 code_list = reader.code.values.tolist()
 dist = pd.read_excel(dist_dir + 'dist_5.xlsx')
 files = dist.columns.values.tolist()
@@ -26,8 +27,8 @@ for file in dists:
     #tmp_files = files
     for num in drop_list:
         G.remove_node(num)
-        #print(num)
-        #tmp_files.remove(remove_name[num])
+        # print(num)
+        # tmp_files.remove(remove_name[num])
         T = nx.minimum_spanning_tree(G)
         pos_t = nx.spring_layout(T)
         """
@@ -38,10 +39,12 @@ for file in dists:
             cnt += 1
         """
         plt.figure()
-        nx.draw_networkx(T, pos=pos_t, with_labels=True, node_size = 18, alpha=0.6)
+        nx.draw_networkx(T, pos=pos_t, with_labels=True,
+                         node_size=18, alpha=0.6)
         #nx.draw_networkx_labels(T, pos_t, labels, font_size=7,font_color='b')
-        #plt.show()
-        plt.savefig('graph\\\mst_inc\\' + file.split('.')[0] + str(num) + '.jpg')
+        # plt.show()
+        plt.savefig('graph\\\mst_inc\\' + file.split('.')
+                    [0] + str(num) + '.jpg')
 
     """
     for item in code_list:
@@ -62,4 +65,3 @@ for file in dists:
         #plt.show()
         plt.savefig('graph\\\mst_inc\\' + file.split('.')[0] + item + '.jpg')
     """
-
