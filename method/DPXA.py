@@ -20,6 +20,7 @@ class MF_DPXA(object):
         self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]        
         self.length = len(self.x_data)
         self.hurst_list = []
+        self.cov_list = []
         self.tau = None
         self.alfa = None
         self.f_alfa = None
@@ -56,6 +57,41 @@ class MF_DPXA(object):
             a.pop()
             b.pop()
         return a+b
+    def _cal_profile(self, data):
+        """
+        distributance profile
+        """
+        mean_t = mean(data)
+        tmp = subtract(data, mean_t)
+        return cumsum(tmp)
+
+    def _cal_diff(self, profile, step_t):
+        """
+        difference between profile and local trend
+        """
+        length = len(profile)
+        difference = []
+        for i in range(length-step_t):
+            window = profile[i:i+step_t]
+            r_x = [x for x in range(i, i+step_t)]
+            trend_coef = polyfit(r_x, window,1)
+            trend = polyval(trend_coef, r_x)
+            difference.append(subtract(window, trend))
+        return difference
+
+    def _cal_var(self, X, Y):
+        multi = multiply(X, Y)
+        return mean(multi)
+
+    def corr_coef(self):
+        step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]   #按照交易日均线
+        #[k for k in range(15, 2000, 10)]
+        profile_x = self._cal_profile(self.x_data)
+        profile_y = self._cal_profile(self.y_data)
+        for step_t in step_list:
+            diff_x = self._cal_diff(profile_x, step_t)
+            diff_y = self._cal_diff(profile_y, step_t)
+            self.cov_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
 
     def generate(self):
         base = 2

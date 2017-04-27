@@ -1,5 +1,6 @@
 from method.InitMethod import stock_base_data, combine_excels, select_data
 from method.DCCA import MF_DCCA
+from method.DPXA import MF_DPXA
 from method.DFA import MF_DFA
 import pandas as pd
 import numpy as np
@@ -10,8 +11,9 @@ lead_dir = dir_base + 'lead\\'
 corr_dir = dir_base + 'corr\\'
 dist_dir = dir_base + 'dist\\'
 oil_list = dir_base + 'oil\\'
+dpxa_list = dir_base + 'lead-sh\\'
 
-files = os.listdir(oil_list)
+files = os.listdir(dpxa_list)
 num_files = len(files)
 step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]
 unit_list = [[1.0 for i in range(num_files)] for j in range(num_files)]
