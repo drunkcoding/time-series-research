@@ -17,7 +17,8 @@ class MF_DPXA(object):
         self.y_data = diff(log(reader.Y.values)).tolist()
         del reader['X']
         del reader['Y']
-        self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]        
+        self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]  
+        #self.z_data = diff(log(reader[key].values)).tolist()   
         self.length = len(self.x_data)
         self.hurst_list = []
         self.cov_list = []
@@ -65,18 +66,22 @@ class MF_DPXA(object):
         tmp = subtract(data, mean_t)
         return cumsum(tmp)
 
-    def _cal_diff(self, profile, step_t):
+    def _cal_diff(self, profile, z_wins, step_t):
         """
         difference between profile and local trend
         """
         length = len(profile)
         difference = []
         for i in range(length-step_t):
-            window = profile[i:i+step_t]
-            r_x = [x for x in range(i, i+step_t)]
-            trend_coef = polyfit(r_x, window,1)
-            trend = polyval(trend_coef, r_x)
-            difference.append(subtract(window, trend))
+            r_x = z_wins[i:i+step_t]
+            r_y = profile[i:i+step_t]
+            result = polyfit(r_x, r_y, 1)
+            point_residual = subtract(r_y, polyval(result, r_x))
+            x_t = [x for x in range(i, i+step_t)]
+            profile_t = cumsum(point_residual)
+            trend_coef = polyfit(x_t, profile_t, 1)
+            trend = polyval(trend_coef, x_t)
+            difference.append(absolute(subtract(x_t, trend)))
         return difference
 
     def _cal_var(self, X, Y):
@@ -88,9 +93,11 @@ class MF_DPXA(object):
         #[k for k in range(15, 2000, 10)]
         profile_x = self._cal_profile(self.x_data)
         profile_y = self._cal_profile(self.y_data)
+        profile_z = self._cal_profile(self.z_data[0])
+        #print(self.z_data, self.x_data)
         for step_t in step_list:
-            diff_x = self._cal_diff(profile_x, step_t)
-            diff_y = self._cal_diff(profile_y, step_t)
+            diff_x = self._cal_diff(profile_x, profile_z, step_t)
+            diff_y = self._cal_diff(profile_y, profile_z, step_t)
             self.cov_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
 
     def generate(self):
