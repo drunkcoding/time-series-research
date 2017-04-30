@@ -26,9 +26,9 @@ def print_graph(filename, folder, x, y, labels, label_x, label_y, locate='lower 
 
 def estimate_fse(filename, class_t, folder):
     reader, reader_rand, reader_surr = FSE_init('data\\' + filename)
-    method_dcca = class_t(-5, 5, 1, reader)
-    method_dcca_rand = class_t(-5, 5, 1, reader_rand)
-    method_dcca_surr = class_t(-5, 5, 1, reader_surr)
+    method_dcca = class_t(-5, 5, 10, reader)
+    method_dcca_rand = class_t(-5, 5, 10, reader_rand)
+    method_dcca_surr = class_t(-5, 5, 10, reader_surr)
     method_dcca.generate()
     method_dcca_rand.generate()
     method_dcca_surr.generate()
