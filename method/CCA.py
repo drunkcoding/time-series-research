@@ -10,12 +10,12 @@ from InitMethod import partition
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
-class MF_DCCA(object):
+class MF_CCA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
         profile = lambda list_t: cumsum([element-mean(list_t) for element in list_t]).tolist()
         self.flist = [float(x)/bandwith for x in range(min_q*bandwith, max_q*bandwith+1)]
         self.x_data = profile(diff(log(reader.X.values)).tolist() )
-        self.y_data = profile(diff(log(reader.Y.values)).tolist() ) 
+        self.y_data = profile(diff(log(reader.Y.values)).tolist() )   
         self.length = len(self.x_data)
         self.hurst_list = []
         self.tau = None
@@ -25,8 +25,8 @@ class MF_DCCA(object):
 
     def _fit_residual(self, degree, x_profile, y_profile, r_x, step_t):
         num_wins = len(x_profile)
-        nroot = lambda x, q: exp(mean(log(sqrt(x)) )) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
-        corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2)), axis = 1))
+        nroot = lambda x, q: exp(mean(multiply(np.sign(x), log(sqrt(x)) ))) if -1e-3<q<1e-3 else power(mean(multiply(np.sign(x), power(x, q/2.0))), 1.0/q)
+        corr = lambda x1, x2, y1, y2: absolute(mean(multiply(subtract(x1, x2), subtract(y1, y2)), axis = 1))
         #x_profile = cumsum(x_wins, axis = 1)
         #y_profile = cumsum(y_wins, axis = 1)
         #r_x = [k for k in range(step_t)]

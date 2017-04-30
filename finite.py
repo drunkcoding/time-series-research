@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 from method.DPXA import MF_DPXA
-from method.DCCA import MF_DCCA
+from method.CCA import MF_CCA
 from method.surrogate import FSE_init
 
 
@@ -26,9 +26,9 @@ def print_graph(filename, folder, x, y, labels, label_x, label_y, locate='lower 
 
 def estimate_fse(filename, class_t, folder):
     reader, reader_rand, reader_surr = FSE_init('data\\' + filename)
-    method_dcca = class_t(-5, 5, 10, reader)
-    method_dcca_rand = class_t(-5, 5, 10, reader_rand)
-    method_dcca_surr = class_t(-5, 5, 10, reader_surr)
+    method_dcca = class_t(-5, 5, 1, reader)
+    method_dcca_rand = class_t(-5, 5, 1, reader_rand)
+    method_dcca_surr = class_t(-5, 5, 1, reader_surr)
     method_dcca.generate()
     method_dcca_rand.generate()
     method_dcca_surr.generate()
@@ -57,7 +57,7 @@ hurst_dpxa = []
 label_hurst = ['A Data', 'B Data', 'C Data']
 for root, dirs, files in os.walk(current_dir):
     for file in files:
-        hurst_dcca.append(estimate_fse(file, MF_DCCA, 'fse_dcca\\'))
+        hurst_dcca.append(estimate_fse(file, MF_CCA, 'fse_dcca\\'))
         hurst_dpxa.append(estimate_fse(file, MF_DPXA, 'fse_dpxa\\'))
 for item in hurst_dcca:
     print item[7]
