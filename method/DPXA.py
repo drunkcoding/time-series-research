@@ -12,7 +12,7 @@ warnings.simplefilter('ignore', np.RankWarning)
 
 class MF_DPXA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
-        self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
+        self.flist = [float(x)/bandwith for x in range(min_q*bandwith, max_q*bandwith+1)]
         self.x_data = diff(log(reader.X.values)).tolist()
         self.y_data = diff(log(reader.Y.values)).tolist()
         del reader['X']
@@ -27,10 +27,8 @@ class MF_DPXA(object):
 
     def _fit_residual(self, degree, x_wins, y_wins, z_wins, r_x, step_t):
         num_wins = len(x_wins)
-        nroot = lambda x, q: exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
-        residual = lambda x, z: subtract(x, dot(z, lstsq(z, x)[0]) )
-        corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2) )), axis = 1)
-        profile = lambda res, mean: subtract(cumsum(res, axis = 1), cumsum(mean, axis = 1))
+        nroot = lambda x, q: exp(mean(multiply(np.sign(x), log(sqrt(x)) ))) if -1e-3<q<1e-3 else power(mean(multiply(np.sign(x), power(x, q/2.0))), 1.0/q)
+        corr = lambda x1, x2, y1, y2: absolute(mean(multiply(subtract(x1, x2), subtract(y1, y2)), axis = 1))
         x_result = [lstsq(transpose(z_wins[i]), x_wins[i])[0] for i in range(num_wins)]
         y_result = [lstsq(transpose(z_wins[i]), y_wins[i])[0] for i in range(num_wins)]
         x_point_residual = [subtract(x_wins[i], dot(transpose(z_wins[i]), x_result[i])) for i in range(num_wins)]
