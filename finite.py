@@ -8,7 +8,7 @@ from method.DCCA import MF_DCCA
 from method.surrogate import FSE_init
 
 
-def print_graph(filename, folder, x, y, labels, label_x, label_y, locate='lower left'):
+def print_graph(filename, folder, x, y, labels, label_x, label_y, scale, locate='lower left'):
     size_t = 10
     plt.figure()
     plt.scatter(x[0], y[0], s=size_t, c='b',
@@ -17,6 +17,7 @@ def print_graph(filename, folder, x, y, labels, label_x, label_y, locate='lower 
                 edgecolors='none', label=labels[1])
     plt.scatter(x[2], y[2], s=size_t, c='y',
                 edgecolors='none', label=labels[2])
+    plt.axis(scale)
     plt.xlabel(label_x)
     plt.ylabel(label_y)
     plt.legend(loc=locate)
@@ -39,7 +40,8 @@ def estimate_fse(filename, class_t, folder):
               method_dcca_rand.f_alfa, method_dcca_surr.f_alfa]
     label_fse = ['origin', 'random', 'surrogate']
     label_hurst = ['A Data', 'B Data', 'C Data']
-    print_graph(filename, folder, alfa, f_alfa, label_fse, 'alfa', 'f_alfa')
+    print_graph(filename, folder, alfa, f_alfa, label_fse,
+                'alfa', 'f_alfa', [0, 1.61, 0, 1.05])
     # print_graph('Hurst' + filename, folder, flist, hurst_list, label_hurst, 'q', 'H_q')
     print(filename)
     print('origin', max(method_dcca.alfa) - min(method_dcca.alfa))
@@ -67,11 +69,12 @@ dcca_p1 = hurst_dcca[0:3]
 dcca_p2 = hurst_dcca[3:6]
 dpxa_p1 = hurst_dpxa[0:3]
 dpxa_p2 = hurst_dpxa[3:6]
-print_graph('Hurst_dcca1', 'fse_dcca\\', flist,
-            dcca_p1, label_hurst, 'q', 'H_q')
-print_graph('Hurst_dcca2', 'fse_dpxa\\', flist,
-            dcca_p2, label_hurst, 'q', 'H_q')
-print_graph('Hurst_dpxa1', 'fse_dcca\\', flist,
-            dpxa_p1, label_hurst, 'q', 'H_q')
-print_graph('Hurst_dpxa2', 'fse_dpxa\\', flist,
-            dpxa_p2, label_hurst, 'q', 'H_q')
+axiss = [-5.1, 5.1, 0.35, 1.4]
+print_graph('dcca1', 'fse_dcca\\', flist,
+            dcca_p1, label_hurst, 'q', 'H_q', axiss)
+print_graph('dcca2', 'fse_dpxa\\', flist,
+            dcca_p2, label_hurst, 'q', 'H_q', axiss)
+print_graph('dpxa1', 'fse_dcca\\', flist,
+            dpxa_p1, label_hurst, 'q', 'H_q', axiss)
+print_graph('dpxa2', 'fse_dpxa\\', flist,
+            dpxa_p2, label_hurst, 'q', 'H_q', axiss)
