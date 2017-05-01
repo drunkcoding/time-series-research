@@ -26,7 +26,7 @@ class MF_DCCA(object):
     def _fit_residual(self, degree, x_profile, y_profile, r_x, step_t):
         num_wins = len(x_profile)
         nroot = lambda x, q: exp(mean(log(sqrt(x)) )) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
-        corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2)), axis = 1))
+        corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2))), axis = 1)
         #x_profile = cumsum(x_wins, axis = 1)
         #y_profile = cumsum(y_wins, axis = 1)
         #r_x = [k for k in range(step_t)]
