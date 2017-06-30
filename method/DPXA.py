@@ -5,7 +5,7 @@ from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor
 from numpy.linalg import lstsq, inv
 import matplotlib.pyplot as plt
 from scipy.special import gamma
-from InitMethod import partition
+#from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
@@ -22,6 +22,7 @@ class MF_DPXA(object):
         self.length = len(self.x_data)
         self.hurst_list = []
         self.cov_list = []
+        self.coef_list = []
         self.tau = None
         self.alfa = None
         self.f_alfa = None
@@ -46,6 +47,7 @@ class MF_DPXA(object):
         y_trend = [polyval(y_trend_coef[i], r_x[i]) for i in range(num_wins)]
         corr_wins = corr(x_profile, x_trend, y_profile, y_trend)
         #print(step_t, corr_wins)
+        self.cov_list.append(mean(corr_wins))
         q_order_corr = [nroot(corr_wins, q) for q in self.flist]
         return q_order_corr
 
@@ -98,12 +100,13 @@ class MF_DPXA(object):
         for step_t in step_list:
             diff_x = self._cal_diff(profile_x, profile_z, step_t)
             diff_y = self._cal_diff(profile_y, profile_z, step_t)
-            self.cov_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
+            self.coef_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
 
     def generate(self):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
-        step_list = [k for k in range(15, int(self.length/2), 10)]
+        #step_list = [k for k in range(15, int(self.length/2), 10)]
+        step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:

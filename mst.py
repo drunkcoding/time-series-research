@@ -8,13 +8,12 @@ import matplotlib.pyplot as plt
 dir_base = 'data\\Chinese_Stock\\'
 lead_dir = dir_base + 'lead\\'
 #dist_dir = dir_base + 'dist\\'
-dist_dir = dir_base + 'dist_oil\\'
+dist_dir = dir_base + 'dist_dcca_down\\'
 oil_list = dir_base + 'oil\\'
 
 dists = os.listdir(dist_dir)
 files = os.listdir(oil_list)
 num_files = len(files)
-
 
 for file in dists:
     dist = pd.read_excel(dist_dir + file)
@@ -34,4 +33,4 @@ for file in dists:
     nx.draw_networkx(T, pos=pos_t, with_labels=False, node_size=18, alpha=0.6)
     nx.draw_networkx_labels(T, pos_t, labels, font_size=7, font_color='b')
     # plt.show()
-    plt.savefig('graph\\\mst_oil\\' + file.split('.')[0] + '.jpg')
+    plt.savefig('graph\\\mst_dcca_down\\' + file.split('.')[0] + '.jpg')

@@ -19,6 +19,7 @@ class MF_DCCA(object):
         self.length = len(self.x_data)
         self.hurst_list = []
         self.cov_list = []
+        self.coef_list = []
         self.tau = None
         self.alfa = None
         self.f_alfa = None
@@ -85,7 +86,7 @@ class MF_DCCA(object):
         for step_t in step_list:
             diff_x = self._cal_diff(profile_x, step_t)
             diff_y = self._cal_diff(profile_y, step_t)
-            self.cov_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
+            self.coef_list.append(self._cal_var(diff_x, diff_y)/np.sqrt(self._cal_var(diff_y, diff_y)*self._cal_var(diff_x, diff_x)))
 
 
     def generate(self):
