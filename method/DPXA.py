@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import division
 import pandas as pd
 import numpy as np
 from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor, cumsum, diff, mean, subtract, multiply, square, absolute
@@ -12,12 +13,13 @@ warnings.simplefilter('ignore', np.RankWarning)
 
 class MF_DPXA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
-        self.flist = [x/bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
+        self.flist = [x / bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
+        #print self.flist
         self.x_data = diff(log(reader.X.values)).tolist()
         self.y_data = diff(log(reader.Y.values)).tolist()
         del reader['X']
         del reader['Y']
-        self.z_data = [diff(log(reader[key].values)).tolist() for key in reader]  
+        self.z_data = diff(log(reader.Z.values)).tolist()
         #self.z_data = diff(log(reader[key].values)).tolist()   
         self.length = len(self.x_data)
         self.hurst_list = []
@@ -30,14 +32,15 @@ class MF_DPXA(object):
 
     def _fit_residual(self, degree, x_wins, y_wins, z_wins, r_x, step_t):
         num_wins = len(x_wins)
-        nroot = lambda x, q: exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
-        residual = lambda x, z: subtract(x, dot(z, lstsq(z, x)[0]) )
-        corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2) )), axis = 1)
-        profile = lambda res, mean: subtract(cumsum(res, axis = 1), cumsum(mean, axis = 1))
-        x_result = [lstsq(transpose(z_wins[i]), x_wins[i])[0] for i in range(num_wins)]
-        y_result = [lstsq(transpose(z_wins[i]), y_wins[i])[0] for i in range(num_wins)]
-        x_point_residual = [subtract(x_wins[i], dot(transpose(z_wins[i]), x_result[i])) for i in range(num_wins)]
-        y_point_residual = [subtract(y_wins[i], dot(transpose(z_wins[i]), y_result[i])) for i in range(num_wins)]
+        nroot = lambda x, q: exp(mean(multiply(np.sign(x), log(sqrt(x)) ))) if -1e-3<q<1e-3 else power(mean(multiply(np.sign(x), power(x, q/2.0))), 1.0/q)
+        corr = lambda x1, x2, y1, y2: absolute(mean(multiply(subtract(x1, x2), subtract(y1, y2)), axis = 1))
+        #nroot = lambda x, q: exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
+        #corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2) )), axis = 1)
+        x_result = [polyfit(z_wins[i], x_wins[i], 1) for i in range(num_wins)]
+        y_result = [polyfit(z_wins[i], y_wins[i], 1) for i in range(num_wins)]
+        x_point_residual = [subtract(x_wins[i], polyval(x_result[i], z_wins[i])) for i in range(num_wins)]
+        y_point_residual = [subtract(y_wins[i], polyval(y_result[i], z_wins[i])) for i in range(num_wins)]
+        #print x_point_residual
         x_profile = cumsum(x_point_residual, axis = 1)
         y_profile = cumsum(y_point_residual, axis = 1)
         #r_x = [k for k in range(step_t)]
@@ -47,7 +50,6 @@ class MF_DPXA(object):
         y_trend = [polyval(y_trend_coef[i], r_x[i]) for i in range(num_wins)]
         corr_wins = corr(x_profile, x_trend, y_profile, y_trend)
         #print(step_t, corr_wins)
-        self.cov_list.append(mean(corr_wins))
         q_order_corr = [nroot(corr_wins, q) for q in self.flist]
         return q_order_corr
 
@@ -105,8 +107,8 @@ class MF_DPXA(object):
     def generate(self):
         base = 2
         #step_list = [int(self.length/base**x) for x in range(2, int(log(self.length)/log(base))+1) if base**x <= self.length/20]
-        #step_list = [k for k in range(15, int(self.length/2), 10)]
-        step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]
+        step_list = [k for k in range(10, int(self.length/2), 1)]
+        #step_list = [5, 10, 20, 40, 60, 120, 245, 500, 750, 1250, 1750]
         #partition = lambda list_t, start_range, end_range, step_t: [list_t[i:i+step_t] for i in range(0,end_range+1,step_t)] + [list_t[i-step_t:i] for i in range(self.length,start_range-1,-step_t)]
         corr_list = []
         for step_t in step_list:
@@ -115,10 +117,10 @@ class MF_DPXA(object):
             #start_range = self.length-end_range
             x_wins = self.partition(self.x_data, step_t, num_wins)
             y_wins = self.partition(self.y_data, step_t, num_wins)
-            z_wins_list = [self.partition(line, step_t, num_wins) for line in self.z_data]
-            length = len(z_wins_list[0])
-            z_wins = [[element[i] for element in z_wins_list] for i in range(length)]
-            #z_wins = partition(self.z_data, start_range, end_range, step_t)
+            #z_wins_list = [self.partition(line, step_t, num_wins) for line in self.z_data]
+            #length = len(z_wins_list[0])
+            #z_wins = [[element[i] for element in z_wins_list] for i in range(length)]
+            z_wins = self.partition(self.z_data, step_t, num_wins)
             tmp = [i for i in range(1, num_wins*step_t+1)]
             r_x = self.partition(tmp, step_t, num_wins)
             corr_list.append(self._fit_residual(7, x_wins, y_wins, z_wins, r_x, step_t))

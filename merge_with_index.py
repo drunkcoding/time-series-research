@@ -17,7 +17,7 @@ files = os.listdir(oil_list)
 num_files = len(files)
 pop_list = ['open', 'high', 'low', 'volume', 'code']
 
-sh = pd.read_excel(dir_base + 'sh_15-17.xlsx')
+sh = pd.read_excel(dir_base + 'sh_13-15.xlsx')
 
 
 df_list = {}
@@ -36,7 +36,7 @@ for i in range(num_files):
         del tmp['date']
         tmp = tmp.dropna()
         tmp.columns = ['X', 'Y', 'Z']
-        tmp.to_excel(dir_base + 'oil-down\\' +
+        tmp.to_excel(dir_base + 'oil-up\\' +
                      files[i].split('.')[0] + '-' + files[j])
 """
 for file in files:
