@@ -33,7 +33,7 @@ for i in range(num_files):
         del tmp['date']
         tmp = tmp.dropna()
         tmp.columns = ['X', 'Y']
-        func_dcca = MF_CCA(-5, 5, 1, tmp)
+        func_dcca = MF_DCCA(-5, 5, 1, tmp)
         func_dcca.corr_coef()
         cov_dcca = func_dcca.cov_list
         for k in range(s_len):
@@ -44,7 +44,7 @@ for i in range(num_files):
 
 for i in range(s_len):
     df_corr = pd.DataFrame(dcca_m[i], columns=files, index=files)
-    df_corr.to_excel(corr_dir + 'cca_corr_' + str(step_list[i]) + '.xlsx')
+    df_corr.to_csv(corr_dir + 'cca_corr_' + str(step_list[i]) + '.csv')
     dist = np.sqrt(np.multiply(2, np.subtract(unit_list, dcca_m[i])))
     df_dist = pd.DataFrame(dist, columns=files, index=files)
-    df_dist.to_excel(dist_dir + 'cca_dist_' + str(step_list[i]) + '.xlsx')
+    df_dist.to_csv(dist_dir + 'cca_dist_' + str(step_list[i]) + '.csv')
