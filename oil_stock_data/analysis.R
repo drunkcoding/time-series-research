@@ -87,15 +87,15 @@ for (i in 1:26){
 tbl = lapply(tbl, function(x) select(x, -code))
 
 for (step in step_list){
-  #up_df_dpxa = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
-  up_df_dcca = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
-  #dn_df_dpxa = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
-  dn_df_dcca = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
+  up_df_dpxa = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
+  #up_df_dcca = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
+  dn_df_dpxa = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
+  #dn_df_dcca = data.frame(matrix(NA,ncol = length(names(tbl)),nrow = length(names(tbl))), row.names = names(tbl))
   
-  #names(up_df_dpxa) = names(tbl)
-  names(up_df_dcca) = names(tbl)
-  #names(dn_df_dpxa) = names(tbl)
-  names(dn_df_dcca) = names(tbl)
+  names(up_df_dpxa) = names(tbl)
+  #names(up_df_dcca) = names(tbl)
+  names(dn_df_dpxa) = names(tbl)
+  #names(dn_df_dcca) = names(tbl)
   for (i in 1:25){
     for (j in (i+1):26){
       # print(dfl_dist_dcca[as.character(step)])
@@ -104,16 +104,16 @@ for (step in step_list){
       tb_y.up = tbl[[j]][tbl[[j]]$date <= as.Date('2015-05-15'),]
       tb_y.dn = tbl[[j]][tbl[[j]]$date > as.Date('2015-05-15'),]
       
-      up_df_dcca[j,i] = dcca_dist(tb_x.up,tb_y.up,step)
-      #up_df_dpxa[j,i] = dpxa_dist(tb_x.up,tb_y.up,step)
-      dn_df_dcca[j,i] = dcca_dist(tb_x.dn,tb_y.dn,step)
-      #dn_df_dpxa[j,i] = dpxa_dist(tb_x.dn,tb_y.dn,step)
+      #up_df_dcca[j,i] = dcca_dist(tb_x.up,tb_y.up,step)
+      up_df_dpxa[j,i] = dpxa_dist(tb_x.up,tb_y.up,step)
+      #dn_df_dcca[j,i] = dcca_dist(tb_x.dn,tb_y.dn,step)
+      dn_df_dpxa[j,i] = dpxa_dist(tb_x.dn,tb_y.dn,step)
     }
   }
-  write.csv(up_df_dcca, file =paste0(as.character(step), ".up_dcca"))
-  #write.csv(up_df_dpxa, file =paste0(as.character(step), ".up_dpxa"))
-  write.csv(dn_df_dcca, file =paste0(as.character(step), ".dn_dcca"))
-  #write.csv(dn_df_dpxa, file =paste0(as.character(step), ".dn_dpxa"))
+  #write.csv(up_df_dcca, file =paste0(as.character(step), ".up_dcca"))
+  write.csv(up_df_dpxa, file =paste0(as.character(step), "-up-dpxa"))
+  #write.csv(dn_df_dcca, file =paste0(as.character(step), ".dn_dcca"))
+  write.csv(dn_df_dpxa, file =paste0(as.character(step), "-dn-dpxa"))
 }
 
 
