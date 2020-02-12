@@ -5,13 +5,13 @@ from numpy import transpose, dot, polyfit, polyval, power, exp, log, sqrt, floor
 from numpy.linalg import lstsq, inv
 import matplotlib.pyplot as plt
 from scipy.special import gamma
-#from InitMethod import partition
+from InitMethod import partition
 
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 class MF_CCA(object):
-    def __init__(self, min_q, max_q, bandwith, reader):
+    def __init__(self, min_q, max_q, bandwith, reader, filename):
         profile = lambda list_t: cumsum([element-mean(list_t) for element in list_t]).tolist()
         self.flist = [float(x)/bandwith for x in range(min_q*bandwith, max_q*bandwith+1)]
         self.x_data = profile(diff(log(reader.X.values)).tolist() )
@@ -21,7 +21,7 @@ class MF_CCA(object):
         self.tau = None
         self.alfa = None
         self.f_alfa = None
-        #self.fig = 'graph\\log_cca\\' + filename.split('.')[0] + '.jpg'
+        self.fig = 'graph\\log_cca\\' + filename.split('.')[0] + '.jpg'
 
     def _fit_residual(self, degree, x_profile, y_profile, r_x, step_t):
         num_wins = len(x_profile)
@@ -65,7 +65,7 @@ class MF_CCA(object):
             tmp = [i for i in range(1, num_wins*step_t+1)]
             r_x = self.partition(tmp, step_t, num_wins)
             corr_list.append(self._fit_residual(7, x_wins, y_wins, r_x, step_t))
-        #plt.figure()
+        plt.figure()
         expected = lambda n: 1/sqrt(n*np.pi/2)*sum([sqrt((n-i)/i) for i in range(1,n)]) if n >=340 else 1/sqrt(np.pi)/gamma(n/2)*gamma((n-1)/2)*sum([sqrt((n-i)/i) for i in range(1,n)])
         for i in range(len(self.flist)):
             F_q = [element[i] for element in corr_list]
@@ -74,9 +74,9 @@ class MF_CCA(object):
             F_log = log(F_q)
             y_log = [F_log[i]-log(expected(step_list[i]))+x_log[i]/2 for i in range(len(step_list))]
             coef = polyfit(x_log, F_log, 1)
-            p#lot2 = plt.plot(x_log, F_log, label='trend')
+            plot2 = plt.plot(x_log, F_log, label='trend')
             self.hurst_list.append(coef[0])
-        #plt.savefig(self.fig)
+        plt.savefig(self.fig)
         #print(self.hurst_list)
         #self.plot(self.hurst_list)
         f_length = len(self.flist)

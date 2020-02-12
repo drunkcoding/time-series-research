@@ -13,8 +13,7 @@ warnings.simplefilter('ignore', np.RankWarning)
 
 class MF_DPXA(object):
     def __init__(self, min_q, max_q, bandwith, reader):
-        self.flist = [x / bandwith for x in range(min_q*bandwith, max_q*bandwith+1, 1)]
-        #print self.flist
+        self.flist = [float(x)/bandwith for x in range(min_q*bandwith, max_q*bandwith+1)]
         self.x_data = diff(log(reader.X.values)).tolist()
         self.y_data = diff(log(reader.Y.values)).tolist()
         del reader['X']
@@ -34,13 +33,10 @@ class MF_DPXA(object):
         num_wins = len(x_wins)
         nroot = lambda x, q: exp(mean(multiply(np.sign(x), log(sqrt(x)) ))) if -1e-3<q<1e-3 else power(mean(multiply(np.sign(x), power(x, q/2.0))), 1.0/q)
         corr = lambda x1, x2, y1, y2: absolute(mean(multiply(subtract(x1, x2), subtract(y1, y2)), axis = 1))
-        #nroot = lambda x, q: exp(mean(log(sqrt(x) )) ) if -1e-3<q<1e-3 else power(mean(power(x, q/2.0)), 1.0/q)
-        #corr = lambda x1, x2, y1, y2: mean(absolute(multiply(subtract(x1, x2), subtract(y1, y2) )), axis = 1)
-        x_result = [polyfit(z_wins[i], x_wins[i], 1) for i in range(num_wins)]
-        y_result = [polyfit(z_wins[i], y_wins[i], 1) for i in range(num_wins)]
-        x_point_residual = [subtract(x_wins[i], polyval(x_result[i], z_wins[i])) for i in range(num_wins)]
-        y_point_residual = [subtract(y_wins[i], polyval(y_result[i], z_wins[i])) for i in range(num_wins)]
-        #print x_point_residual
+        x_result = [lstsq(transpose(z_wins[i]), x_wins[i])[0] for i in range(num_wins)]
+        y_result = [lstsq(transpose(z_wins[i]), y_wins[i])[0] for i in range(num_wins)]
+        x_point_residual = [subtract(x_wins[i], dot(transpose(z_wins[i]), x_result[i])) for i in range(num_wins)]
+        y_point_residual = [subtract(y_wins[i], dot(transpose(z_wins[i]), y_result[i])) for i in range(num_wins)]
         x_profile = cumsum(x_point_residual, axis = 1)
         y_profile = cumsum(y_point_residual, axis = 1)
         #r_x = [k for k in range(step_t)]

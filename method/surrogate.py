@@ -79,7 +79,7 @@ def refined_AAFT_surrogates(original_data, n_iterations):
         r_phases = r_fft / np.abs(r_fft)
 
         #  Transform back, replacing the actual amplitudes by the desired
-        #  ones, but keeping the phases exp(
+        #  ones, but keeping the phases exp(iPHI(i)
         s = np.fft.irfft(original_fourier_amps * r_phases, n=n_time,
                          axis=1)
 
