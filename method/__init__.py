@@ -1,1 +1,1 @@
-__all__ = ['DPXA', 'DCCA']
+__all__ = ['DPXA', 'DCCA', 'surrogate']
