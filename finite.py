@@ -9,7 +9,6 @@ from method.surrogate import FSE_init
 
 current_dir = 'data/Chinese_Stock/oil-up/'
 
-
 def print_graph(filename, folder, x, y, labels, label_x, label_y, scale, locate='lower left'):
     size_t = 10
     plt.figure()
