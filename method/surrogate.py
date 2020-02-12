@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from numpy import random
 
+
 def correlated_noise_surrogates(original_data):
     #  Calculate FFT of original_data time series
     #  The FFT of the original_data data has to be calculated only once,
@@ -22,7 +23,8 @@ def correlated_noise_surrogates(original_data):
     #  Calculate IFFT and take the real part, the remaining imaginary part
     #  is due to numerical errors.
     return np.ascontiguousarray(np.real(np.fft.irfft(surrogates, n=n_time,
-                                                         axis=1)))
+                                                     axis=1)))
+
 
 def AAFT_surrogates(original_data):
     #  Create sorted Gaussian reference series
@@ -51,6 +53,7 @@ def AAFT_surrogates(original_data):
 
     return rescaled_data
 
+
 def refined_AAFT_surrogates(original_data, n_iterations):
     #  Get size of dimensions
     n_time = original_data.shape[1]
@@ -76,9 +79,9 @@ def refined_AAFT_surrogates(original_data, n_iterations):
         r_phases = r_fft / np.abs(r_fft)
 
         #  Transform back, replacing the actual amplitudes by the desired
-        #  ones, but keeping the phases exp(iψ(i)
+        #  ones, but keeping the phases exp(
         s = np.fft.irfft(original_fourier_amps * r_phases, n=n_time,
-                             axis=1)
+                         axis=1)
 
         #  Rescale to desired amplitude distribution
         ranks = s.argsort(axis=1).argsort(axis=1)
@@ -88,8 +91,9 @@ def refined_AAFT_surrogates(original_data, n_iterations):
 
     return R
 
+
 def FSE_init(filename):
-    reader = pd.read_csv(filename)
+    reader = pd.read_excel(filename)
     df_origin = reader
     df_random = reader.iloc[np.random.permutation(len(reader))]
     key_list = [key for key in reader]
@@ -97,6 +101,7 @@ def FSE_init(filename):
     tmp_surr = AAFT_surrogates(np.array(list_t))
     #tmp_surr = refined_AAFT_surrogates(np.array(list_t), 10)
     surrogated = {}
-    for i in range(len(key_list)): surrogated[key_list[i]] = tmp_surr[i]
+    for i in range(len(key_list)):
+        surrogated[key_list[i]] = tmp_surr[i]
     df_surr = pd.DataFrame(surrogated)
     return (df_origin, df_random, df_surr)
